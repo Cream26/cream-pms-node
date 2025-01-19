@@ -35,8 +35,7 @@ export class DepartService {
     if (!departId) {
       return this.buildDepartTree(departMap);
     }
-    // 如果指定了 departId，查找该部门
-    const targetDepart = departMap.get(new ObjectId(departId));
+    const targetDepart = departMap.get(departId);
     if (!targetDepart) {
       throw new Error('部门不存在');
     }
@@ -139,52 +138,47 @@ export class DepartService {
     })
   }
 
-  // 构建部门树(将所有部门数据按照父子关系整理)
-  buildDepartTree(departMap: Map<ObjectId, Depart>): DepartTree[] {
-    const result: DepartTree[] = [];
-
-    // 遍历部门Map，找出根部门（parentId 为 null 的部门）
-    departMap.forEach((depart) => {
-      if (!depart.parentId) {
-        // 根部门没有父级，直接作为树根节点
-        const formattedDepart = this.formatDepart(depart, departMap);
-        result.push(formattedDepart);
-      }
+  // 将部门数组转换为Map,以便查找
+  buildDepartMap(departs: Depart[]) {
+    const departMap = new Map<string, Depart>();
+    departs.forEach((depart) => {
+      departMap.set(depart.id.toString(), depart);
     });
-
-    return result;
+    return departMap;
   }
 
   // 格式化部门数据
-  formatDepart(depart: Depart, departMap: Map<ObjectId, Depart>): DepartTree {
+  formatDepart(depart: Depart, departMap: Map<string, Depart>): DepartTree {
     const formattedDepart: DepartTree = {
       ...depart,
       key: depart.id.toString(),
       id: depart.id,
-      children: this.getChildren(depart.id, departMap),
+      children: this.getChildren(depart.id.toString(), departMap),
     };
     return formattedDepart;
   }
 
   // 获取子部门
-  getChildren(parentId: ObjectId, departMap: Map<ObjectId, Depart>) {
-    const children: Depart[] = [];
+  getChildren(parentId: string, departMap: Map<string, Depart>) {
+    const children: DepartTree[] = [];
     departMap.forEach((depart) => {
-      if (depart.parentId && depart.parentId.toString() === parentId.toString()) {
-        // 当前部门的 parentId 等于传入的 parentId，表示是其子部门
+      if (depart.parentId && depart.parentId.toString() === parentId) {
         const formattedChild = this.formatDepart(depart, departMap);
         children.push(formattedChild);
       }
     });
     return children;
   }
-  // 将部门数组转换为Map,以便查找
-  buildDepartMap(departs: Depart[]) {
-    const departMap = new Map<ObjectId, Depart>();
-    departs.forEach((depart) => {
-      departMap.set(depart.id, depart);
-    })
-    return departMap;
+  // 构建部门树
+  buildDepartTree(departMap: Map<string, Depart>): DepartTree[] {
+    const result: DepartTree[] = [];
+    departMap.forEach((depart) => {
+      if (!depart.parentId) {
+        const formattedDepart = this.formatDepart(depart, departMap);
+        result.push(formattedDepart);
+      }
+    });
+    return result;
   }
 }
 
