@@ -1,6 +1,6 @@
 import { Inject, Provide } from '@midwayjs/core';
 import { Depart, DepartTree } from '../entity/depart.entity';
-// import { DepartTree } from '../entity/depart.entity';
+import { User } from '../entity/user.entity';
 import { MongoRepository } from 'typeorm';
 import { InjectEntityModel } from '@midwayjs/typeorm';
 import { Context } from '@midwayjs/koa';
@@ -10,6 +10,9 @@ import { ObjectId } from 'mongodb';
 export class DepartService {
   @InjectEntityModel(Depart)
   departModel: MongoRepository<Depart>;
+
+  @InjectEntityModel(User)
+  userModel: MongoRepository<User>;
 
   @Inject()
   ctx: Context;
@@ -22,14 +25,24 @@ export class DepartService {
 
 
   // 获取部门树
-  async getDepartTree() {
+  async getDepartTreeById(departId?: string) {
+    // 获取所有部门数据
     const departs = await this.getAllDepart();
+    // 构建部门 Map
     const departMap = this.buildDepartMap(departs);
-    const tree = this.buildDepartTree(departMap);
-    return tree;
+
+    // 如果没有指定 departId，返回完整的部门树
+    if (!departId) {
+      return this.buildDepartTree(departMap);
+    }
+    // 如果指定了 departId，查找该部门
+    const targetDepart = departMap.get(new ObjectId(departId));
+    if (!targetDepart) {
+      throw new Error('部门不存在');
+    }
+    // 使用 formatDepart 构建指定部门的子树
+    return [this.formatDepart(targetDepart, departMap)];
   }
-
-
 
   // 根据type添加上下级部门
   async addDepartByType(data: {
@@ -90,6 +103,39 @@ export class DepartService {
       _id: new ObjectId(data.id),
     }, {
       $set: { name: data.name, description: data.description }
+    })
+  }
+
+  // 调整部门关系
+  async adjustDepartment(data: {
+    departId: string;
+    parentId: string | null;
+  }) {
+    const newParentId = data.parentId?.trim() ? new ObjectId(data.parentId) : null;
+    return await this.departModel.updateOne({
+      _id: new ObjectId(data.departId),
+    }, {
+      $set: { parentId: newParentId }
+    })
+  }
+
+  // 删除部门
+  async deleteDepart(departId: string) {
+    const hasChildDeparts = await this.departModel.findOne({
+      where: { parentId: new ObjectId(departId) },
+    });
+    if (hasChildDeparts) {
+      throw new Error('该部门下有子部门，无法删除');
+    }
+    // 检查部门下是否有人员
+    const hasUsers = await this.userModel.findOne({
+      where: { departId: new ObjectId(departId) }
+    });
+    if (hasUsers) {
+      throw new Error('该部门下存在人员，无法删除');
+    }
+    return await this.departModel.deleteOne({
+      _id: new ObjectId(departId),
     })
   }
 
