@@ -180,5 +180,17 @@ export class DepartService {
     });
     return result;
   }
+
+  // 递归获取部门树中所有部门的ID
+  getDepartIdsByDepartTree(departList: DepartTree[], result: string[]) {
+    if (!departList) return;
+    
+    departList.forEach(depart => {
+      result.push(depart.id.toString());
+      if (depart.children?.length) {
+        this.getDepartIdsByDepartTree(depart.children, result);
+      }
+    });
+  }
 }
 

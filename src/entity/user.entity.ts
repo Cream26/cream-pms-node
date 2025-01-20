@@ -1,10 +1,15 @@
 import { Column, Entity, BeforeInsert } from 'typeorm'
 import { Base, BaseCollectEnum } from './base.entity'
-// import { ObjectId } from 'mongodb' 
+import { ObjectId } from 'mongodb' 
 
 export enum UserRoleEnum {
   ADMIN = 'admin',
   USER = 'user'
+}
+// 1表示正常，0表示禁用
+export enum UserStatusEnum {
+  NORMAL = 1,
+  DISABLE = 0
 }
 
 @Entity(BaseCollectEnum.user)
@@ -23,6 +28,13 @@ export class User extends Base {
 
   @Column()
   email: string;
+
+  @Column()
+  departId: ObjectId | null;
+
+  @Column()
+  status: UserStatusEnum;
+
   
   // 角色
   @Column({

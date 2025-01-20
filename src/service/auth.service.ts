@@ -2,7 +2,7 @@ import { Inject, Provide } from '@midwayjs/core';
 import { LoginDTO } from '../interface';
 import { JwtService } from '@midwayjs/jwt';
 import {InjectEntityModel} from '@midwayjs/typeorm';
-import { User } from '../entity/user.entity';
+import { User, UserStatusEnum } from '../entity/user.entity';
 import { MongoRepository } from 'typeorm';
 
 @Provide()
@@ -26,6 +26,9 @@ export class AuthService {
     }
     if(user.password !== body.password) {
       throw new Error('账号或密码错误')
+    }
+    if(user.status === UserStatusEnum.DISABLE) {
+      throw new Error('用户已禁用，请联系管理员')
     }
     const token = await this.jwtService.sign({
       id: user.id,
