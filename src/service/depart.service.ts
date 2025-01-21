@@ -184,7 +184,7 @@ export class DepartService {
   // 递归获取部门树中所有部门的ID
   getDepartIdsByDepartTree(departList: DepartTree[], result: string[]) {
     if (!departList) return;
-    
+
     departList.forEach(depart => {
       result.push(depart.id.toString());
       if (depart.children?.length) {
@@ -192,5 +192,14 @@ export class DepartService {
       }
     });
   }
-}
 
+  // 根据id查询当前部门信息
+  async findById(id: string | ObjectId) {
+    if (typeof id !== 'string') id = new ObjectId(id)
+    return await this.departModel.findOne({
+      where: {
+        _id: id
+      }
+    });
+  }
+}

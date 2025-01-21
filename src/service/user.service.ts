@@ -4,10 +4,9 @@ import { MongoRepository } from 'typeorm';
 import { Context } from '@midwayjs/koa';
 import { InjectEntityModel } from '@midwayjs/typeorm';
 import { ObjectId } from 'mongodb';
-// import { mapObjectId } from '../utils/mongodbHelp';
 import { DepartService } from './depart.service';
 import { Depart } from '../entity/depart.entity';
-
+import { getFieldsByExcluded } from '../utils/mongodbHelp';
 @Provide()
 export class UserService {
   @InjectEntityModel(User)
@@ -163,16 +162,35 @@ export class UserService {
       { _id: new ObjectId(user.id) },
       { $set: updateData }
     );
+  }
 
+  // 获取所有用户
+  async getAllUser() {
+    const selectFields = getFieldsByExcluded(this.userModel, ['password'])
+    return await this.userModel.find({
+      select: selectFields
+    })
   }
 
   // 根据id查询用户
-  async findById(id: string) {
-    return await this.userModel.findOne({
+  async findById(id: string | ObjectId) {
+    if (typeof id === 'string') {
+      id = new ObjectId(id);
+    }
+    const selectFields = getFieldsByExcluded(this.userModel, ['password'])
+    console.log(selectFields,'selectFields')
+    const user = await this.userModel.findOne({
       where: {
-        _id: new ObjectId(id)
-      }
-    })
+        _id: id
+      },
+      select: selectFields
+    });
+    // 转换 ID 为字符串并返回
+    return {
+      ...user,
+      id: user.id.toString(),
+      departId: user.departId?.toString()
+    };
   }
 }
 

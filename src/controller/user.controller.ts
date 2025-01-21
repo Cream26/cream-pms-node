@@ -63,4 +63,10 @@ export class UserController {
   async updateUser(@Body() body: Omit<User, 'password'>) {
     return this.userService.updateUser(body);
   }
+
+  // 获取所有用户
+  @Get('/getAllUser')
+  async getAllUser() {
+    return this.userService.getAllUser()
+  }
 }
