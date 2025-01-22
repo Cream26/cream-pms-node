@@ -29,4 +29,5 @@ export enum BaseCollectEnum {
   user = 'user',
   codeStore = 'codeStore',
   depart = 'depart',
+  project = 'project',
 }
