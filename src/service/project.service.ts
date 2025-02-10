@@ -5,6 +5,8 @@ import { InjectEntityModel } from '@midwayjs/typeorm';
 import { ObjectId } from 'mongodb';
 import { UserService } from './user.service';
 import { DepartService } from './depart.service';
+import { CodeStoreDetail } from '../entity/project.entity';
+
 
 @Provide()
 export class ProjectService {
@@ -123,5 +125,57 @@ export class ProjectService {
       ownerInfo,
       departInfo,
     };
+  }
+
+  // 增加项目的代码仓库
+  async addCodeStoreById(body: {
+    codeStoreItem: CodeStoreDetail;
+    projectId: string;
+  }) {
+    const { codeStoreItem, projectId } = body;
+
+    // 查找项目
+    const project = await this.projectModel.findOne({
+      where: {
+        _id: new ObjectId(projectId)
+      }
+    });
+    if (!project) {
+      throw new Error('项目不存在');
+    }
+    project.codeStoreList.push(codeStoreItem);
+    // 保存更新后的项目
+    return await this.projectModel.save(project);
+  }
+  // 更新项目的代码仓库
+  async updateCodeStoreById(body: {
+    codeStoreItem: CodeStoreDetail;
+    projectId: string;
+  }) {
+    const { codeStoreItem, projectId } = body;
+
+    // 查找项目
+    const project = await this.projectModel.findOne({
+      where: {
+        _id: new ObjectId(projectId)
+      }
+    });
+    if (!project) {
+      throw new Error('项目不存在');
+    }
+    // 查找要更新的代码仓库项的索引
+    const index = project.codeStoreList.findIndex(item => item.uid === codeStoreItem.uid);
+    if (index === -1) {
+      throw new Error('代码仓库项不存在');
+    }
+
+    // 使用 $set 操作符更新代码仓库项
+    const updateData = {
+      [`codeStoreList.${index}`]: { ...project.codeStoreList[index], ...codeStoreItem }
+    };
+    return await this.projectModel.updateOne(
+      { _id: new ObjectId(projectId) },
+      { $set: updateData }
+    );
   }
 }

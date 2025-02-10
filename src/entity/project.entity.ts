@@ -3,6 +3,7 @@ import { Base,BaseCollectEnum } from './base.entity';
 import { ObjectId } from 'mongodb';
 
 export interface CodeStoreDetail {
+  uid: string;
   name: string;
   storeAddress: string;
   mainBranch: string;
@@ -39,4 +40,9 @@ export class Project extends Base {
 
   @Column({type: 'array',default:[]})
   codeStoreList: CodeStoreDetail[];
+
+  constructor(){
+    super()
+    this.codeStoreList = []
+  }
 }

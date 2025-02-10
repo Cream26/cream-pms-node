@@ -1,6 +1,7 @@
 import { Body, Controller, Post, Inject, Get, Query } from '@midwayjs/core';
 import { Context } from '@midwayjs/koa';
 import { ProjectService } from '../service/project.service';
+import { CodeStoreDetail } from '../entity/project.entity';
 
 @Controller('/project')
 export class ProjectController {
@@ -47,6 +48,24 @@ export class ProjectController {
   @Get('/getProjectDetailById')
   async getProjectDetailById(@Query('projectId') projectId: string) {
     return this.projectService.getProjectDetailById(projectId)
+  }
+
+  // 添加代码仓库
+  @Post('/addCodeStoreById')
+  async addCodeStoreById(@Body() body: {
+    codeStoreItem: CodeStoreDetail
+    projectId: string
+  }){
+    return this.projectService.addCodeStoreById(body)
+  }
+
+  // 更新代码仓库
+  @Post('/updateCodeStoreById')
+  async updateCodeStoreById(@Body() body: {
+    codeStoreItem: CodeStoreDetail
+    projectId: string
+  }){
+    return this.projectService.updateCodeStoreById(body)
   }
 
 }
