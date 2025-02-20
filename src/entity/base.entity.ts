@@ -30,4 +30,6 @@ export enum BaseCollectEnum {
   codeStore = 'codeStore',
   depart = 'depart',
   project = 'project',
+  task = 'task',
+  taskInfo = 'taskInfo',
 }

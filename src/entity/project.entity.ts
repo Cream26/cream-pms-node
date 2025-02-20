@@ -41,8 +41,11 @@ export class Project extends Base {
   @Column({type: 'array',default:[]})
   codeStoreList: CodeStoreDetail[];
 
-  constructor(){
-    super()
+  constructor(option?: Omit<Project, 'id'>) {
+    super();
     this.codeStoreList = []
+    Object.keys(option || {}).forEach(key => {
+      this[key] = option[key];
+    });
   }
 }
