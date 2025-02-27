@@ -6,6 +6,7 @@ import { ObjectId } from 'mongodb';
 import { UserService } from './user.service';
 import { DepartService } from './depart.service';
 import { CodeStoreDetail } from '../entity/project.entity';
+import { TaskService } from './task.service';
 
 
 @Provide()
@@ -18,6 +19,9 @@ export class ProjectService {
 
   @Inject()
   userService: UserService;
+
+  @Inject()
+  taskService: TaskService;
 
   @Inject()
   departService: DepartService;
@@ -78,12 +82,13 @@ export class ProjectService {
   async getAllProject() {
     const projectLists = await this.projectModel.find()
     const projectInfoList = await Promise.all(projectLists.map(async (project) => {
-      const [projectPMInfo, frontendLeadInfo, backendLeadInfo, ownerInfo, departInfo] = await Promise.all([
+      const [projectPMInfo, frontendLeadInfo, backendLeadInfo, ownerInfo, departInfo, taskList] = await Promise.all([
         this.userService.findById(project.projectPMId),
         this.userService.findById(project.frontendLeadId),
         this.userService.findById(project.backendLeadId),
         this.userService.findById(project.ownerId),
         this.departService.findById(project.departId),
+        this.taskService.getTaskList(project.id.toString())
       ])
       return {
         ...project,
@@ -92,6 +97,7 @@ export class ProjectService {
         backendLeadInfo,
         ownerInfo,
         departInfo,
+        taskList
       }
     }))
     return projectInfoList

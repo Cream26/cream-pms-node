@@ -44,11 +44,24 @@ export class TaskService {
 
   // 获取任务列表
   async getTaskList(projectId: string) {
-    return await this.taskModel.find({
+    const tasks = await this.taskModel.find({
       where: {
         projectId: new ObjectId(projectId)
       }
     });
+    const taskDetails = await Promise.all(tasks.map(async (task) => {
+      const taskInfoList = await this.taskInfoModel.find({
+        where: {
+          taskId: new ObjectId(task.id)
+        }
+      })
+      return {
+        ...task,
+        taskInfoList
+      }
+    }
+  ))
+  return taskDetails;
   }
 
   // 更新任务

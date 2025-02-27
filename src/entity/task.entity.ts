@@ -2,7 +2,7 @@ import { Entity, Column } from 'typeorm';
 import { Base,BaseCollectEnum } from './base.entity';
 import { ObjectId } from 'mongodb';
 
-interface DeveloperConfirm {
+export interface DeveloperConfirm {
   startDate: string;
   inputRatio: number;
 }
@@ -32,7 +32,7 @@ export class Task extends Base {
   @Column()
   expectLaunchTime: string;
 
-  @Column({ type: 'json', default: {} })
+  @Column()
   developerMap: { [key: string]: DeveloperConfirm };
 
   constructor(option?: Omit<Task, 'id'>) {
