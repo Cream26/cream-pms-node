@@ -25,10 +25,17 @@ export default {
   // jwt
   jwt: {
     secret: 'jsgdwdhjwsdheywgdehbdhsfhhedgf',
+    accessToken: {
+      secret: 'jgdhyeyukoejdyskldfyhjdh',
+      expiresIn: '30m'
+    },
+    refreshToken: {
+      secret: 'jgdhyeyukoejdydjfhdskldfyhjdh',
+      expiresIn: '7d'
+    },
     sign: {
-      expiresIn: '2d',  // token过期时间
       audience: '', // 目标受众
-      issuer: '', // 签发者
+      issuer: 'pms', // 签发者
       algorithm: 'HS256', // 加密算法
     },
     verify: {
@@ -38,5 +45,13 @@ export default {
       complete: true,  // 是否返回完整的解析后的数据
       
     }
-  }
+  },
+  // redis
+  redis: {
+    client: {
+      port: 6379,
+      host: '127.0.0.1',
+      db: 0,
+    },
+  },
 } as MidwayConfig;

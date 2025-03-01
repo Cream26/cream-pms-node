@@ -10,6 +10,7 @@ import { FormatMiddleware } from './middleware/format.middleware';
 import { AuthMiddleware } from './middleware/auth.middleware';
 import * as orm from '@midwayjs/typeorm';
 import * as jwt from '@midwayjs/jwt';
+import * as redis from '@midwayjs/redis';
 
 @Configuration({
   imports: [
@@ -21,6 +22,7 @@ import * as jwt from '@midwayjs/jwt';
     },
     orm,
     jwt,
+    redis,
   ],
   importConfigs: [join(__dirname, './config')],
 })
